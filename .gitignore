@@ -1,0 +1,22 @@
+# Python
+backend/venv/
+backend/__pycache__/
+**/__pycache__/
+backend/.env
+*.pyc
+*.pyo
+
+# Node
+desktop/node_modules/
+desktop/out/
+desktop/dist/
+
+# Secrets — never commit these
+.env
+*.key
+*.pem
+
+# OS
+.DS_Store
+Thumbs.db
+desktop/node_modules/.cache/
