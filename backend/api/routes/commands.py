@@ -8,12 +8,12 @@ router = APIRouter(prefix="/commands", tags=["commands"])
 
 @router.post("/", response_model=CommandResponse)
 async def handle_command(req: CommandRequest):
-    parsed = parse_command(req.text)
+    parsed = await parse_command(req.text)
 
     if not parsed:
         return CommandResponse(
             success=False,
-            message=f'Command not understood: "{req.text}". Try: play, stop, set bpm 140, mute channel 1.',
+            message=f'Command not understood: "{req.text}".',
         )
 
     result = await bridge_client.send_command(parsed["action"], parsed["params"])
