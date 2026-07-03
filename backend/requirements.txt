@@ -5,3 +5,4 @@ pydantic>=2.11.0
 websockets>=14.1
 anthropic>=0.40.0
 python-multipart>=0.0.18
+vosk>=0.3.45

@@ -1,4 +1,5 @@
 import { useState, useRef, type KeyboardEvent } from 'react'
+import { useVoice } from '../../hooks/useVoice'
 
 type Props = {
   onSubmit: (text: string) => Promise<void>
@@ -21,8 +22,8 @@ export function CommandBar({ onSubmit, disabled }: Props) {
   const [history, setHistory] = useState<string[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const submit = async () => {
-    const text = value.trim()
+  const submit = async (override?: string) => {
+    const text = (override ?? value).trim()
     if (!text || loading) return
     setLoading(true)
     setHistory((h) => [text, ...h.slice(0, 49)])
@@ -32,6 +33,11 @@ export function CommandBar({ onSubmit, disabled }: Props) {
     setLoading(false)
     inputRef.current?.focus()
   }
+
+  const voice = useVoice((text) => {
+    setValue(text)
+    submit(text)
+  })
 
   const onKey = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') { submit(); return }
@@ -49,6 +55,10 @@ export function CommandBar({ onSubmit, disabled }: Props) {
     }
   }
 
+  const micLabel =
+    voice.state === 'recording' ? '■' :
+    voice.state === 'transcribing' ? '…' : '🎙'
+
   return (
     <div className="border-t border-surface-600 bg-surface-800 p-3 space-y-2">
       <div className="flex gap-2">
@@ -61,7 +71,12 @@ export function CommandBar({ onSubmit, disabled }: Props) {
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={onKey}
             disabled={disabled || loading}
-            placeholder={disabled ? 'Backend offline…' : 'Tell FL Studio what to do…'}
+            placeholder={
+              disabled ? 'Backend offline…' :
+              voice.state === 'recording' ? 'Listening…' :
+              voice.state === 'transcribing' ? 'Transcribing…' :
+              'Tell FL Studio what to do…'
+            }
             className="w-full pl-8 pr-3 py-2.5 bg-surface-700 border border-surface-600 rounded-lg
                        text-sm text-zinc-100 placeholder-zinc-600 outline-none
                        focus:border-accent focus:ring-1 focus:ring-accent/30
@@ -70,7 +85,19 @@ export function CommandBar({ onSubmit, disabled }: Props) {
           />
         </div>
         <button
-          onClick={submit}
+          onClick={voice.toggle}
+          disabled={disabled || loading || voice.state === 'transcribing'}
+          title={voice.state === 'recording' ? 'Stop and transcribe' : 'Voice command'}
+          className={`px-3.5 py-2.5 rounded-lg text-sm font-semibold transition-colors
+                      disabled:opacity-40 disabled:cursor-not-allowed
+                      ${voice.state === 'recording'
+                        ? 'bg-red-500 hover:bg-red-400 text-white animate-pulse'
+                        : 'bg-surface-700 hover:bg-surface-600 text-zinc-300 border border-surface-600'}`}
+        >
+          {micLabel}
+        </button>
+        <button
+          onClick={() => submit()}
           disabled={disabled || loading || !value.trim()}
           className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40
                      disabled:cursor-not-allowed rounded-lg text-sm font-semibold
@@ -79,6 +106,10 @@ export function CommandBar({ onSubmit, disabled }: Props) {
           {loading ? '…' : 'Send'}
         </button>
       </div>
+
+      {voice.error && (
+        <p className="text-xs text-red-400">{voice.error}</p>
+      )}
 
       <div className="flex gap-1.5 flex-wrap">
         {SUGGESTIONS.map((s) => (
