@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 
-const API = 'http://127.0.0.1:8000'
-const WS_URL = 'ws://127.0.0.1:8000/ws'
+const API = 'http://127.0.0.1:8001'
+const WS_URL = 'ws://127.0.0.1:8001/ws'
 
 export type FLStatus = {
   connected: boolean
