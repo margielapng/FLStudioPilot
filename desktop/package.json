@@ -38,6 +38,19 @@
       "dist/**/*",
       "electron/**/*"
     ],
+    "extraResources": [
+      {
+        "from": "../backend",
+        "to": "backend",
+        "filter": [
+          "**/*",
+          "!venv/**",
+          "!__pycache__/**",
+          "!**/__pycache__/**",
+          "!.env"
+        ]
+      }
+    ],
     "directories": {
       "output": "release"
     },

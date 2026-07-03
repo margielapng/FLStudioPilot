@@ -10,6 +10,7 @@ backend/.env
 desktop/node_modules/
 desktop/out/
 desktop/dist/
+desktop/release/
 
 # Secrets — never commit these
 .env

@@ -11,11 +11,20 @@ let tray = null
 let backendProcess = null
 
 function startBackend() {
-  const backendDir = path.join(__dirname, '..', '..', 'backend')
+  // Dev: repo layout (desktop/electron → repo root → backend).
+  // Packaged: backend ships as an extraResource next to the app.
+  const backendDir = isDev
+    ? path.join(__dirname, '..', '..', 'backend')
+    : path.join(process.resourcesPath, 'backend')
   backendProcess = spawn('python', ['main.py'], {
     cwd: backendDir,
     stdio: 'inherit',
     windowsHide: true,
+    env: {
+      ...process.env,
+      BACKEND_PORT: '8001',
+      BACKEND_RELOAD: isDev ? 'true' : 'false',
+    },
   })
   backendProcess.on('error', (err) => {
     console.error('[FL Copilot] Failed to start backend:', err.message)
